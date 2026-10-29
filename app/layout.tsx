@@ -56,8 +56,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${fraunces.variable} ${manrope.variable}`} suppressHydrationWarning>
       <head>
-        {/* Flags JS availability so scroll-reveal styles only apply when they can be undone. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        {/* Flags JS availability so scroll-reveal styles only apply when they can be undone.
+            Fail-open: if the reveal observer hasn't started within 3s (scripts blocked or
+            failed to load), drop the flag so all content is shown. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "document.documentElement.classList.add('js');setTimeout(function(){if(!window.__revealReady)document.documentElement.classList.remove('js')},3000)",
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

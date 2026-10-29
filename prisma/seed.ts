@@ -10,8 +10,9 @@ import bcrypt from "bcryptjs";
 import fs from "node:fs";
 import path from "node:path";
 import * as data from "./seed-data";
+import { databaseUrl } from "../lib/database-url";
 
-const db = new PrismaClient();
+const db = new PrismaClient({ datasourceUrl: databaseUrl() });
 const FORCE = process.env.SEED_FORCE === "true";
 const LOCALE = "en";
 

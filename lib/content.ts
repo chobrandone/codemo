@@ -13,13 +13,51 @@ export const CONTENT_TAG = "content";
 // Vercel's Data Cache outlives deployments; scoping keys per deployment means a
 // new deploy (e.g. right after seeding) never serves results cached by an older one.
 const DEPLOYMENT = process.env.VERCEL_DEPLOYMENT_ID ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
-const cached = <A extends unknown[], R>(fn: (...args: A) => Promise<R>, key: string) =>
-  unstable_cache(fn, [key, DEPLOYMENT], { tags: [CONTENT_TAG], revalidate: 3600 });
+const CACHE_VERSION = "v2";
 
-export const getSettings = cached(async (locale: string = DEFAULT_LOCALE) => {
-  const s =
+/** Thrown inside the cache so empty results are returned but never stored. */
+class EmptyResult<R> extends Error {
+  constructor(readonly value: R) {
+    super("empty content result");
+  }
+}
+const isEmpty = (v: unknown) => v == null || (Array.isArray(v) && v.length === 0);
+
+/**
+ * Caches non-empty results only: an empty table (e.g. a request made before
+ * the database was seeded) is re-queried on every request until content exists,
+ * instead of being served from cache for an hour.
+ */
+const cached = <A extends unknown[], R>(fn: (...args: A) => Promise<R>, key: string) => {
+  const store = unstable_cache(
+    async (...args: A) => {
+      const value = await fn(...args);
+      if (isEmpty(value)) throw new EmptyResult(value);
+      return value;
+    },
+    [CACHE_VERSION, key, DEPLOYMENT],
+    { tags: [CONTENT_TAG], revalidate: 3600 },
+  );
+  return async (...args: A): Promise<R> => {
+    try {
+      return await store(...args);
+    } catch (e) {
+      if (e instanceof EmptyResult) return e.value as R;
+      throw e;
+    }
+  };
+};
+
+const getStoredSettings = cached(async (locale: string) => {
+  return (
     (await db.siteSettings.findUnique({ where: { locale } })) ??
-    (await db.siteSettings.findUnique({ where: { locale: DEFAULT_LOCALE } }));
+    (await db.siteSettings.findUnique({ where: { locale: DEFAULT_LOCALE } }))
+  );
+}, "settings");
+
+/** Site settings, or built-in defaults while the database has none (defaults are not cached). */
+export const getSettings = async (locale: string = DEFAULT_LOCALE) => {
+  const s = await getStoredSettings(locale);
   return (
     s ?? {
       locale,
@@ -45,7 +83,7 @@ export const getSettings = cached(async (locale: string = DEFAULT_LOCALE) => {
       updatedAt: new Date(),
     }
   );
-}, "settings");
+};
 
 export const getSections = cached(async (page: PageKey, locale: string = DEFAULT_LOCALE) => {
   return db.pageSection.findMany({ where: { page, locale, visible: true }, orderBy: { order: "asc" } });

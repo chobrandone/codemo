@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 export function RevealObserver() {
   const pathname = usePathname();
   useEffect(() => {
+    (window as Window & { __revealReady?: boolean }).__revealReady = true;
     const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]:not([data-revealed])"));
     if (!("IntersectionObserver" in window)) {
       els.forEach((el) => el.setAttribute("data-revealed", ""));
