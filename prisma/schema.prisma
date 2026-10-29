@@ -1,0 +1,252 @@
+// CODEMO website — data model.
+// Every content table carries a `locale` column (default "en") so a French
+// version can be added later without schema changes.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  role         Role     @default(EDITOR)
+  active       Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// One row per locale.
+model SiteSettings {
+  locale          String   @id @default("en")
+  siteName        String
+  shortName       String   @default("CODEMO")
+  tagline         String
+  logoUrl         String?
+  faviconUrl      String?
+  address         String
+  phone           String?
+  email           String?
+  whatsappNumber  String?
+  whatsappMessage String?
+  /// [{ label, href }]
+  socialLinks     Json     @default("[]")
+  seoTitle        String
+  seoDescription  String
+  ogTitle         String?
+  ogImage         String?
+  themeColor      String   @default("#1F5A36")
+  mapEmbedUrl     String?
+  footerTagline   String?
+  copyright       String?
+  updatedAt       DateTime @updatedAt
+}
+
+enum PageKey {
+  HOME
+  ABOUT
+  ACTIVITIES
+  CONTACT
+  ACTIVITY_DETAIL
+}
+
+/// Editable block of a page. `key` identifies the renderer (hero, cooperative, …).
+/// `items` holds section-specific repeatable data (timeline entries, gallery tiles, …).
+model PageSection {
+  id               String   @id @default(cuid())
+  page             PageKey
+  key              String
+  locale           String   @default("en")
+  order            Int      @default(0)
+  visible          Boolean  @default(true)
+  name             String
+  eyebrow          String?
+  heading          String?
+  headingAccent    String?
+  subheading       String?
+  body             String?  @db.Text
+  image            String?
+  imageAlt         String?
+  image2           String?
+  image2Alt        String?
+  primaryLabel     String?
+  primaryHref      String?
+  secondaryLabel   String?
+  secondaryHref    String?
+  footnote         String?
+  /// [{ title, text, image, alt, value }]
+  items            Json     @default("[]")
+  updatedAt        DateTime @updatedAt
+
+  @@unique([page, key, locale])
+  @@index([page, locale, order])
+}
+
+model Activity {
+  id              String   @id @default(cuid())
+  slug            String
+  locale          String   @default("en")
+  number          String
+  title           String
+  status          String
+  tagline         String?
+  summary         String   @db.Text
+  currentCapacity String?
+  expansionPlan   String?
+  highlightValue  String?
+  highlightLabel  String?
+  coverImage      String?
+  coverAlt        String?
+  /// [{ value, label }]
+  heroStats       Json     @default("[]")
+  /// [{ heading, body(html), image, alt }]
+  detailSections  Json     @default("[]")
+  roadmapEyebrow  String?
+  roadmapTitle    String?
+  /// [{ title, text }]
+  roadmap         Json     @default("[]")
+  /// [{ value, label, text }]
+  targets         Json     @default("[]")
+  /// [{ url, alt }]
+  gallery         Json     @default("[]")
+  showOnHome      Boolean  @default(true)
+  seoTitle        String?
+  seoDescription  String?
+  order           Int      @default(0)
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([slug, locale])
+  @@index([locale, published, order])
+}
+
+model InfrastructureItem {
+  id          String   @id @default(cuid())
+  locale      String   @default("en")
+  title       String
+  description String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([locale, order])
+}
+
+enum StatGroup {
+  HERO_FACT
+  COOPERATIVE
+  VISION
+  ABOUT
+}
+
+model Stat {
+  id          String    @id @default(cuid())
+  group       StatGroup
+  locale      String    @default("en")
+  value       String
+  suffix      String?
+  label       String
+  description String?
+  order       Int       @default(0)
+  published   Boolean   @default(true)
+  updatedAt   DateTime  @updatedAt
+
+  @@index([group, locale, order])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  locale      String   @default("en")
+  title       String
+  category    String
+  location    String
+  description String   @db.Text
+  image       String?
+  imageAlt    String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@index([locale, order])
+}
+
+model BulletPoint {
+  id        String   @id @default(cuid())
+  group     String   @default("rural-development")
+  locale    String   @default("en")
+  text      String
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@index([group, locale, order])
+}
+
+enum NavLocation {
+  HEADER
+  FOOTER_QUICK
+  FOOTER_ACTIVITIES
+}
+
+model NavLink {
+  id        String      @id @default(cuid())
+  location  NavLocation
+  locale    String      @default("en")
+  label     String
+  href      String
+  order     Int         @default(0)
+  visible   Boolean     @default(true)
+  updatedAt DateTime    @updatedAt
+
+  @@index([location, locale, order])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  storageKey String  @unique
+  driver    String
+  filename  String
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  alt       String?
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  inquiryType String
+  message     String   @db.Text
+  ip          String?
+  userAgent   String?
+  read        Boolean  @default(false)
+  emailSent   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([read, createdAt])
+  @@index([inquiryType])
+}
+
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+}

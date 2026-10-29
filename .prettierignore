@@ -1,0 +1,6 @@
+.next
+node_modules
+uploads
+public
+prisma/migrations
+package-lock.json

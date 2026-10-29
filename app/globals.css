@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background font-body text-body;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-medium;
+    letter-spacing: -0.015em;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-gold ring-offset-2;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-12;
+  }
+  .eyebrow {
+    @apply flex items-center gap-3 text-[10.4px] font-bold uppercase tracking-[0.3em];
+  }
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-7 shrink-0 bg-current opacity-60;
+  }
+  .section-title {
+    @apply mt-5 text-[30px] leading-[1.1] text-ink sm:text-4xl lg:text-[46px];
+  }
+  .dot-grid {
+    background-image: radial-gradient(rgba(19, 42, 37, 0.055) 0.5px, transparent 0.5px);
+    background-size: 14px 14px;
+  }
+
+  /* Rich text coming from the CMS */
+  .rich p + p {
+    @apply mt-4;
+  }
+  .rich ul {
+    @apply mt-5 space-y-3;
+  }
+  .rich ol {
+    @apply mt-5 list-decimal space-y-2 pl-5;
+  }
+  .rich ul > li {
+    @apply relative pl-6;
+  }
+  .rich ul > li::before {
+    content: "";
+    @apply absolute left-0 top-[0.6em] h-1.5 w-1.5 rounded-full bg-gold;
+  }
+  .rich a {
+    @apply text-primary underline decoration-gold underline-offset-4;
+  }
+  .rich strong {
+    @apply font-semibold text-ink;
+  }
+  .rich h3 {
+    @apply mt-6 text-xl text-ink;
+  }
+  .rich-light strong {
+    @apply text-white;
+  }
+
+  /* Admin uses the UI sans font for headings */
+  .admin h1,
+  .admin h2,
+  .admin h3,
+  .admin h4 {
+    font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: normal;
+  }
+  .admin .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply pointer-events-none float-left h-0 text-zinc-400;
+  }
+}
+
+/* Scroll reveal — only hidden once JS has flagged the document (no-JS stays visible). */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-reveal="fade"] {
+  transform: none;
+}
+.js [data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

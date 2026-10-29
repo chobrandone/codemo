@@ -1,0 +1,76 @@
+# CODEMO website — Hostinger VPS (or any Docker host)
+#
+#   cp .env.example .env    # fill in secrets
+#   docker compose up -d --build
+#
+# Optional bundled Nginx (port 80/443):  docker compose --profile proxy up -d
+# Most VPS setups run Nginx on the host instead — see deploy/nginx/codemo.conf.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-codemo}
+      POSTGRES_USER: ${POSTGRES_USER:-codemo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-codemo} -d ${POSTGRES_DB:-codemo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # One-off job: applies migrations and seeds content/admin (idempotent).
+  migrate:
+    build:
+      context: .
+      target: builder
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-codemo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-codemo}?schema=public
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-codemo}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-codemo}?schema=public
+      UPLOAD_DIR: /app/uploads
+      AUTH_TRUST_HOST: "true"
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  nginx:
+    image: nginx:1.27-alpine
+    profiles: ["proxy"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./deploy/nginx/docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - uploads:/srv/uploads:ro
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  uploads:

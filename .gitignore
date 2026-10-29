@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+build
+coverage
+uploads/*
+!uploads/.gitkeep
+.env
+.env.local
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+npm-debug.log*
+.DS_Store
+.pgdata
