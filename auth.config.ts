@@ -5,7 +5,10 @@ import type { NextAuthConfig } from "next-auth";
  * provider — which needs Prisma and bcrypt — is added in auth.ts.
  */
 export const authConfig = {
-  pages: { signIn: "/admin/login" },
+  // Accept the Auth.js v4 variable name too, in case it was set that way.
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || undefined,
+  // Configuration errors land on the login page, which explains what to fix.
+  pages: { signIn: "/admin/login", error: "/admin/login" },
   session: { strategy: "jwt", maxAge: 60 * 60 * 8 },
   trustHost: true,
   providers: [],

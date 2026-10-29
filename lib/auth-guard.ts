@@ -9,7 +9,7 @@ import { db } from "./db";
  * disabling a user takes effect immediately. Use in every admin page/action.
  */
 export async function requireUser(role?: Role) {
-  const session = await auth();
+  const session = await auth().catch(() => null);
   if (!session?.user?.id) redirect("/admin/login");
   const user = await db.user.findUnique({
     where: { id: session.user.id },
