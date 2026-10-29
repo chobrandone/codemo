@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:vercel": "prisma migrate deploy && next build",
+    "build:vercel": "prisma migrate deploy && prisma db seed && next build",
     "start": "next start",
     "start:standalone": "node .next/standalone/server.js",
     "lint": "eslint .",

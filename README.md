@@ -145,14 +145,11 @@ Tips:
    - Create a bucket (e.g. `codemo-media`), enable **Public access** (r2.dev subdomain or a custom domain like `media.example.com`).
    - Create an R2 API token with *Object Read & Write* on that bucket.
    - `S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com`, `S3_REGION=auto`, `S3_PUBLIC_URL=https://media.example.com`.
-3. **Import the repository** in Vercel (framework: Next.js). `vercel.json` already sets the build command to `npm run build:vercel` (= `prisma migrate deploy && next build`), and `postinstall` runs `prisma generate`.
+3. **Import the repository** in Vercel (framework: Next.js). `vercel.json` already sets the build command to `npm run build:vercel` (= `prisma migrate deploy && prisma db seed && next build`), and `postinstall` runs `prisma generate`. The seed only fills empty tables, so it loads the site content on the first deploy and never overwrites CMS edits afterwards.
 4. **Environment variables** (Project → Settings → Environment Variables): `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_SITE_URL=https://your-domain`, `STORAGE_DRIVER=s3`, all `S3_*`, `SMTP_*`, `CONTACT_RECEIVER_EMAIL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`. (`S3_PUBLIC_URL` must be present at build time so `next/image` can optimise bucket images.)
 5. **Deploy** — `vercel deploy --prod` or push to the main branch.
-6. **Seed once** from your machine against the production database:
-   ```bash
-   DATABASE_URL="<production url>" ADMIN_EMAIL="you@domain" ADMIN_PASSWORD="<strong password>" npm run db:seed
-   ```
-   The original photography is served from `public/images` (part of the deployment); new uploads go to the bucket.
+6. **Content and first admin** are created automatically by the build. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` *before* deploying; if they were missing, add them and redeploy (the admin is created on the next build). The original photography is served from `public/images` (part of the deployment); new uploads go to the bucket.
+   > If the live site shows only the header and footer, the database is empty: check that `DATABASE_URL` points to the right database and redeploy.
 7. Add your domain in Vercel → Domains.
 
 > On Vercel a single request body is limited to ~4.5 MB, so upload images smaller than that (the VPS accepts up to 10 MB).

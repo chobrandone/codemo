@@ -10,8 +10,11 @@ import { DEFAULT_LOCALE } from "./utils";
  * so the public site is served from cache but updates immediately.
  */
 export const CONTENT_TAG = "content";
+// Vercel's Data Cache outlives deployments; scoping keys per deployment means a
+// new deploy (e.g. right after seeding) never serves results cached by an older one.
+const DEPLOYMENT = process.env.VERCEL_DEPLOYMENT_ID ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
 const cached = <A extends unknown[], R>(fn: (...args: A) => Promise<R>, key: string) =>
-  unstable_cache(fn, [key], { tags: [CONTENT_TAG], revalidate: 3600 });
+  unstable_cache(fn, [key, DEPLOYMENT], { tags: [CONTENT_TAG], revalidate: 3600 });
 
 export const getSettings = cached(async (locale: string = DEFAULT_LOCALE) => {
   const s =
