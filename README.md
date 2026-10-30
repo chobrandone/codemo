@@ -119,7 +119,7 @@ Sign in at **`/admin/login`**. Two roles exist:
 | --- | --- |
 | **Dashboard** | Unread/total messages, activities and projects counts, latest messages, quick links. |
 | **Messages** | Every contact-form submission. Filter by status (unread/read) and by “I am contacting you as”, search, open to read (auto-marks read), mark read/unread, delete, bulk actions, **Export CSV**, reply by email. |
-| **Page sections** | Choose a page (Home, About, Activities overview, Activity pages (shared blocks), Contact). Drag sections to reorder, toggle to show/hide, click to edit: eyebrow, heading, highlighted (gold italic) words, rich-text body, images + alt text, button labels/links, and section lists (timeline, gallery tiles, contact cards, form options). |
+| **Pages & sections** | Every page is a list of sections. Drag to reorder, switch to show/hide, **duplicate** (the copy starts hidden, right below the original), **delete**, or **Add section** from the block library: Page hero, Text, Text + image, Cards, Image gallery, Figures (count-up), Call to action. Click a section to edit its eyebrow, heading, gold highlighted words, rich-text body, images + alt text, buttons and lists. **New page** creates a page at `/your-slug` (optionally added to the header menu) built from the same blocks; each custom page has its own title, URL, SEO fields, publish switch and delete button. |
 | **Activities** | Create/edit/delete activities and their pages (`/activities/[slug]`): number, status pill, summary, capacity, expansion plan, cover, key figures, numbered detail sections (rich text + optional side image), roadmap steps, future targets, gallery, SEO. Toggle **Published** (draft = hidden) and **Show in home page cards**. Drag to reorder. |
 | **Expansion projects** | Cards in the home “#projects” section (category, location, description, image). |
 | **Infrastructure** | The numbered list in “A Production Site Built to Scale”. |
@@ -127,7 +127,7 @@ Sign in at **`/admin/login`**. Two roles exist:
 | **Rural development points** | The check-list in the Rural Development section. |
 | **Navigation & footer** | Header menu, footer Quick Links and footer Activities links. |
 | **Media library** | Upload (drag & drop, multiple), search, edit alt text, copy URL, delete. Images are resized to max 2400 px and compressed to WebP automatically. |
-| **Site settings** | Name, tagline, logo, favicon, address, phone, email, WhatsApp number + prefilled message, social links, footer text, SEO title/description, OG title/image, theme colour, map embed. |
+| **Site settings** | Name, tagline, logo, favicon, address, phone, email, WhatsApp number + prefilled message, social links, footer text, SEO title/description, OG title/image, theme colour, map embed, **languages** offered by the language switch. |
 | **Users** | (Admins) create users, change role, enable/disable, reset password, delete. The last active admin cannot be disabled or demoted. |
 | **My account** | Change your display name and password. |
 
@@ -136,7 +136,7 @@ Tips:
 - Every list (sections, activities, projects, stats, links, repeaters) supports drag-and-drop with the mouse, touch, or keyboard (focus the ⠿ handle, press Space, use arrows, Space again).
 - Link fields accept `/path`, `/#anchor`, `https://…`, `mailto:` and `tel:`.
 - **Map embed:** in Google Maps, *Share → Embed a map → Copy HTML* and paste the whole `<iframe>`; the URL is extracted automatically.
-- **Bilingual-ready:** every content row has a `locale` column (default `en`). A French version can be added later by inserting `fr` rows and adding locale routing — no schema change needed.
+- **Languages (EN / FR):** the top bar (and mobile menu) has a language switch powered by Google Translate. Visitors who pick French get an automatic machine translation of the public site; Google's script is only loaded for them, so the English site stays fast. Brand names in the logo are never translated. Choose the languages in Site settings (e.g. `en,fr` or `en,fr,es`; just `en` hides the switch). Machine translation can be imperfect (e.g. “Home” → “Maison”); the content model also keeps a `locale` column, so hand-written French content can be added later.
 
 ## Deploying to Vercel
 

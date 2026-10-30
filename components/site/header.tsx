@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, ArrowUpRight, Mail, MapPin, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
+import { LanguageSwitcher } from "./language-switcher";
 
 type NavItem = { id: string; label: string; href: string };
 
@@ -18,6 +19,7 @@ export function Header({
   email,
   whatsapp,
   nav,
+  languages = [],
 }: {
   name: string;
   tagline?: string | null;
@@ -27,6 +29,8 @@ export function Header({
   email?: string | null;
   whatsapp?: string | null;
   nav: NavItem[];
+  /** Languages offered by the Google Translate switch; first = site language. */
+  languages?: string[];
 }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -73,13 +77,13 @@ export function Header({
           </p>
           <div className="hidden items-center gap-7 md:flex">
             {phone && (
-              <span className="flex items-center gap-2">
+              <span className="hidden items-center gap-2 lg:flex">
                 <Phone className="h-3 w-3 text-gold" aria-hidden />
                 {phone}
               </span>
             )}
             {email && (
-              <span className="flex items-center gap-2">
+              <span className="hidden items-center gap-2 lg:flex">
                 <Mail className="h-3 w-3 text-gold" aria-hidden />
                 {email}
               </span>
@@ -94,17 +98,16 @@ export function Header({
                 WhatsApp <ArrowUpRight className="h-3 w-3" aria-hidden />
               </a>
             )}
+            <LanguageSwitcher languages={languages} compact />
           </div>
-          {whatsapp && (
-            <a
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              className="text-white transition-colors hover:text-gold md:hidden"
-            >
-              WhatsApp
-            </a>
-          )}
+          <div className="flex shrink-0 items-center gap-3 md:hidden">
+            <LanguageSwitcher languages={languages} compact />
+            {whatsapp && (
+              <a href={whatsapp} target="_blank" rel="noreferrer" className="text-white transition-colors hover:text-gold">
+                WhatsApp
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
@@ -192,6 +195,11 @@ export function Header({
             >
               Partner With Us <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
+            {languages.length > 1 && (
+              <div className="mt-8 border-t border-white/10 pt-6">
+                <LanguageSwitcher languages={languages} />
+              </div>
+            )}
           </nav>
         </div>
       </div>

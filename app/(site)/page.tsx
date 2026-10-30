@@ -8,6 +8,7 @@ import {
   VisionSection,
 } from "@/components/site/home";
 import { CtaSection } from "@/components/site/sections";
+import { GenericSection } from "@/components/site/generic-sections";
 import {
   getActivities,
   getBullets,
@@ -31,7 +32,7 @@ export default async function HomePage() {
   ]);
 
   const render = (s: Section) => {
-    switch (s.key) {
+    switch (s.type || s.key) {
       case "hero":
         return <HomeHero key={s.id} section={s} facts={facts} />;
       case "cooperative":
@@ -49,7 +50,7 @@ export default async function HomePage() {
       case "cta":
         return <CtaSection key={s.id} section={s} />;
       default:
-        return null;
+        return <GenericSection key={s.id} section={s} />;
     }
   };
 

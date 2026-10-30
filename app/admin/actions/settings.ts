@@ -43,6 +43,13 @@ const schema = z.object({
     .transform((v) => (v ? v : null)),
   footerTagline: optStr(500),
   copyright: optStr(200),
+  languages: z
+    .string()
+    .trim()
+    .max(60)
+    .optional()
+    .transform((v) => (v ?? "").toLowerCase().replace(/\s+/g, ""))
+    .refine((v) => v === "" || /^[a-z]{2}(-[a-z]{2})?(,[a-z]{2}(-[a-z]{2})?)*$/.test(v), "Use language codes separated by commas, e.g. en,fr"),
 });
 
 export async function saveSettings(_prev: ActionResult, fd: FormData): Promise<ActionResult> {

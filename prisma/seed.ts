@@ -52,21 +52,24 @@ async function seedSettings() {
   console.log("✓ Site settings");
 }
 
+/**
+ * A page's default sections are created only while that page has none, so
+ * sections deleted in the CMS are not re-created by later builds.
+ */
 async function seedSections() {
-  let order = 0;
-  let page = "";
-  for (const s of data.sections) {
-    if (s.page !== page) {
-      page = s.page;
-      order = 0;
+  const pages = [...new Set(data.sections.map((s) => s.page))];
+  let seeded = 0;
+  for (const page of pages) {
+    const where = { page, customPageId: "", locale: LOCALE };
+    if ((await db.pageSection.count({ where })) > 0 && !FORCE) continue;
+    if (FORCE) await db.pageSection.deleteMany({ where });
+    const rows = data.sections.filter((s) => s.page === page);
+    for (const [order, s] of rows.entries()) {
+      await db.pageSection.create({ data: { ...s, type: s.key, locale: LOCALE, order, items: s.items ?? [] } });
+      seeded++;
     }
-    const payload = { ...s, locale: LOCALE, order: order++, items: s.items ?? [] };
-    const where = { page_key_locale: { page: s.page, key: s.key, locale: LOCALE } };
-    const exists = await db.pageSection.findUnique({ where });
-    if (exists && !FORCE) continue;
-    await db.pageSection.upsert({ where, create: payload, update: payload });
   }
-  console.log("✓ Page sections");
+  if (seeded) console.log(`✓ Page sections (${seeded})`);
 }
 
 /** Seed a collection only when it is empty (or when forced). */

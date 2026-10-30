@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { db } from "@/lib/db";
-import { pageBySlug, sectionConfig, type SectionFieldKey } from "@/lib/admin/section-config";
+import { sectionConfig, sectionTypeLabel, type SectionFieldKey } from "@/lib/admin/section-config";
+import { resolveAdminPage } from "@/lib/admin/pages";
 import { saveSection } from "@/app/admin/actions/sections";
 import { Card, CardBody, CardHeader, PageHeader } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/form";
@@ -17,10 +18,11 @@ export const metadata: Metadata = { title: "Edit section" };
 
 export default async function EditSection({ params }: { params: Promise<{ slug: string; id: string }> }) {
   const { slug, id } = await params;
-  const page = pageBySlug(slug);
+  const page = await resolveAdminPage(slug);
   const s = await db.pageSection.findUnique({ where: { id } });
-  if (!page || !s || s.page !== page.key) notFound();
-  const cfg = sectionConfig(s.page, s.key);
+  if (!page || !s || s.page !== page.key || s.customPageId !== page.customPageId) notFound();
+  const type = s.type || s.key;
+  const cfg = sectionConfig(s.page, type);
   const has = (f: SectionFieldKey) => cfg.fields.includes(f);
   const label = (f: SectionFieldKey, fallback: string) => cfg.labels?.[f] ?? fallback;
 
@@ -40,7 +42,7 @@ export default async function EditSection({ params }: { params: Promise<{ slug: 
       </Link>
       <PageHeader
         title={s.name}
-        description={`${page.label} page · section “${s.key}”`}
+        description={`${page.label} · ${sectionTypeLabel(type)} section`}
         actions={
           <>
             <label className="flex items-center gap-2 text-sm text-zinc-600">

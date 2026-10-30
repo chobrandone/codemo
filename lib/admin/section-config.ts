@@ -156,7 +156,71 @@ const CONFIG: Record<string, Config> = {
 
 const CTA: Config = { fields: [...base, "image", "primary", "secondary"], labels: { image: "Background image (faded)" } };
 
-export function sectionConfig(page: PageKey, key: string): Config {
-  if (key === "cta") return CTA;
-  return CONFIG[`${page}:${key}`] ?? { fields: [...base, "image", "primary", "secondary", "footnote"] };
+/** Blocks that can be added to any page, including CMS-created pages. */
+export const SECTION_LIBRARY: { type: string; label: string; description: string }[] = [
+  { type: "page-hero", label: "Page hero", description: "Dark banner with title, intro text and background image." },
+  { type: "text", label: "Text", description: "Heading and rich text in a centred column, optional buttons." },
+  { type: "text-image", label: "Text + image", description: "Two columns: text and buttons beside a large image." },
+  { type: "cards", label: "Cards", description: "Numbered cards with title, text and optional image." },
+  { type: "gallery", label: "Image gallery", description: "Grid of photos with captions." },
+  { type: "stats", label: "Figures", description: "Dark band of count-up numbers with labels." },
+  { type: "cta", label: "Call to action", description: "Full-width banner with heading and two buttons." },
+];
+
+const GENERIC: Record<string, Config> = {
+  "page-hero": { fields: [...base, "image"], labels: { image: "Background image" } },
+  hero: { fields: [...base, "image"], labels: { image: "Background image" } },
+  cta: CTA,
+  text: { fields: [...base, "primary", "secondary"] },
+  "text-image": {
+    fields: [...base, "subheading", "image", "primary", "secondary"],
+    labels: { subheading: "Image position" },
+    hints: { subheading: "Type “left” to put the image on the left (default: right)." },
+  },
+  cards: {
+    fields: [...base, "primary", "secondary"],
+    items: {
+      label: "Cards",
+      addLabel: "Add card",
+      fields: [
+        { key: "title", label: "Title" },
+        { key: "text", label: "Text", type: "textarea" },
+        { key: "image", label: "Image (optional)", type: "image", altKey: "alt" },
+      ],
+    },
+  },
+  gallery: {
+    fields: base,
+    items: {
+      label: "Images",
+      addLabel: "Add image",
+      fields: [
+        { key: "image", label: "Image", type: "image", altKey: "alt" },
+        { key: "title", label: "Caption (optional)" },
+      ],
+    },
+  },
+  stats: {
+    fields: [...base, "footnote"],
+    items: {
+      label: "Figures",
+      hint: "Numbers count up on scroll (e.g. 2,000 kg, 20+). Text values are shown as typed.",
+      addLabel: "Add figure",
+      fields: [
+        { key: "value", label: "Value", placeholder: "2,000 kg" },
+        { key: "title", label: "Label" },
+        { key: "text", label: "Description (optional)", type: "textarea" },
+      ],
+    },
+  },
+};
+
+/** Field layout for a section, by the page it belongs to and its renderer type. */
+export function sectionConfig(page: PageKey, type: string): Config {
+  return CONFIG[`${page}:${type}`] ?? GENERIC[type] ?? { fields: [...base, "image", "primary", "secondary", "footnote"] };
+}
+
+/** Human label for a section type (built-in types fall back to the type id). */
+export function sectionTypeLabel(type: string) {
+  return SECTION_LIBRARY.find((t) => t.type === type)?.label ?? type.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 }

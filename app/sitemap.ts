@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
-import { getActivities } from "@/lib/content";
+import { getActivities, getCustomPages } from "@/lib/content";
 import { siteUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const activities = await getActivities().catch(() => []);
+  const [activities, customPages] = await Promise.all([
+    getActivities().catch(() => []),
+    getCustomPages().catch(() => []),
+  ]);
   const now = new Date();
   const pages = ["", "/about", "/activities", "/contact"].map((p) => ({
     url: siteUrl(p || "/"),
@@ -20,6 +23,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(a.updatedAt),
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    ...customPages.map((p) => ({
+      url: siteUrl(`/${p.slug}`),
+      lastModified: new Date(p.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
   ];
 }

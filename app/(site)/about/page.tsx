@@ -3,6 +3,7 @@ import { getSections, getStats, sectionMap, type Section } from "@/lib/content";
 import { asItems } from "@/lib/utils";
 import { CtaSection, PageHero, StatFigure } from "@/components/site/sections";
 import { AccentHeading, ButtonLink, Eyebrow, Reveal, SiteImage } from "@/components/site/primitives";
+import { GenericSection } from "@/components/site/generic-sections";
 import { RichText } from "@/components/site/rich-text";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,7 +19,7 @@ export default async function AboutPage() {
   const [sections, stats] = await Promise.all([getSections("ABOUT"), getStats("ABOUT")]);
 
   const render = (s: Section) => {
-    switch (s.key) {
+    switch (s.type || s.key) {
       case "hero":
         return <PageHero key={s.id} section={s} />;
       case "story":
@@ -130,7 +131,7 @@ export default async function AboutPage() {
       case "cta":
         return <CtaSection key={s.id} section={s} />;
       default:
-        return null;
+        return <GenericSection key={s.id} section={s} />;
     }
   };
 

@@ -86,8 +86,26 @@ export const getSettings = async (locale: string = DEFAULT_LOCALE) => {
 };
 
 export const getSections = cached(async (page: PageKey, locale: string = DEFAULT_LOCALE) => {
-  return db.pageSection.findMany({ where: { page, locale, visible: true }, orderBy: { order: "asc" } });
+  return db.pageSection.findMany({
+    where: { page, customPageId: "", locale, visible: true },
+    orderBy: { order: "asc" },
+  });
 }, "sections");
+
+export const getCustomPage = cached(async (slug: string, locale: string = DEFAULT_LOCALE) => {
+  return db.customPage.findFirst({ where: { slug, locale, published: true } });
+}, "custom-page");
+
+export const getCustomPageSections = cached(async (customPageId: string) => {
+  return db.pageSection.findMany({
+    where: { page: "CUSTOM", customPageId, visible: true },
+    orderBy: { order: "asc" },
+  });
+}, "custom-page-sections");
+
+export const getCustomPages = cached(async (locale: string = DEFAULT_LOCALE) => {
+  return db.customPage.findMany({ where: { locale, published: true }, orderBy: { createdAt: "asc" } });
+}, "custom-pages");
 
 export const getStats = cached(async (group: StatGroup, locale: string = DEFAULT_LOCALE) => {
   return db.stat.findMany({ where: { group, locale, published: true }, orderBy: { order: "asc" } });
@@ -122,5 +140,8 @@ export type Settings = Awaited<ReturnType<typeof getSettings>>;
 export type ActivityRecord = NonNullable<Awaited<ReturnType<typeof getActivity>>>;
 
 export function sectionMap(sections: Section[]) {
-  return Object.fromEntries(sections.map((s) => [s.key, s])) as Record<string, Section | undefined>;
+  // Keyed by renderer type; the first visible section of each type wins.
+  const map: Record<string, Section | undefined> = {};
+  for (const s of sections) map[s.type || s.key] ??= s;
+  return map;
 }

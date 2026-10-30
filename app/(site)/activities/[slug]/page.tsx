@@ -5,6 +5,9 @@ import { asItems, cn } from "@/lib/utils";
 import { ActivityCard, CtaSection, PageHero, StatFigure } from "@/components/site/sections";
 import { ButtonLink, Eyebrow, Reveal, SiteImage, TextLink } from "@/components/site/primitives";
 import { RichText } from "@/components/site/rich-text";
+import { GenericSection } from "@/components/site/generic-sections";
+
+const FIXED_BLOCKS = ["hero", "targets", "gallery", "more", "cta"];
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -25,6 +28,8 @@ export default async function ActivityPage({ params }: Props) {
   const [activity, all, shared] = await Promise.all([getActivity(slug), getActivities(), getSections("ACTIVITY_DETAIL")]);
   if (!activity) notFound();
   const blocks = sectionMap(shared);
+  // Sections added in the CMS beyond the fixed activity layout
+  const extras = shared.filter((s) => !FIXED_BLOCKS.includes(s.type || s.key));
   const heroStats = asItems(activity.heroStats);
   const details = asItems(activity.detailSections);
   const roadmap = asItems(activity.roadmap);
@@ -183,6 +188,10 @@ export default async function ActivityPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {extras.map((s) => (
+        <GenericSection key={s.id} section={s} />
+      ))}
 
       <CtaSection section={blocks.cta} />
     </>

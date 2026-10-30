@@ -5,6 +5,7 @@ import { asItems, whatsappLink } from "@/lib/utils";
 import { PageHero } from "@/components/site/sections";
 import { AccentHeading, Eyebrow, Reveal, SiteImage } from "@/components/site/primitives";
 import { RichText } from "@/components/site/rich-text";
+import { GenericSection } from "@/components/site/generic-sections";
 import { ContactForm } from "@/components/site/contact-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -44,7 +45,7 @@ export default async function ContactPage() {
   };
 
   const render = (s: Section) => {
-    switch (s.key) {
+    switch (s.type || s.key) {
       case "hero":
         return <PageHero key={s.id} section={s} />;
       case "inquiries":
@@ -111,6 +112,8 @@ export default async function ContactPage() {
             </div>
           </section>
         );
+      case "form":
+        return null; // rendered inside the "inquiries" section
       case "map":
         return (
           <section key={s.id} className="bg-mist py-16 lg:py-24">
@@ -152,7 +155,7 @@ export default async function ContactPage() {
           </section>
         );
       default:
-        return null;
+        return <GenericSection key={s.id} section={s} />;
     }
   };
 

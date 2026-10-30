@@ -52,6 +52,8 @@ model SiteSettings {
   mapEmbedUrl     String?
   footerTagline   String?
   copyright       String?
+  /// Comma-separated language codes offered in the top-bar switch (Google Translate). First = site language.
+  languages       String   @default("en,fr")
   updatedAt       DateTime @updatedAt
 }
 
@@ -61,14 +63,19 @@ enum PageKey {
   ACTIVITIES
   CONTACT
   ACTIVITY_DETAIL
+  CUSTOM
 }
 
-/// Editable block of a page. `key` identifies the renderer (hero, cooperative, …).
+/// Editable block of a page. `type` selects the renderer (hero, cooperative, text-image, …);
+/// `key` is a unique id within the page (duplicates get "hero-2", …).
 /// `items` holds section-specific repeatable data (timeline entries, gallery tiles, …).
 model PageSection {
   id               String   @id @default(cuid())
   page             PageKey
+  /// Set (CustomPage.id) only when page = CUSTOM; "" for built-in pages.
+  customPageId     String   @default("")
   key              String
+  type             String   @default("")
   locale           String   @default("en")
   order            Int      @default(0)
   visible          Boolean  @default(true)
@@ -91,8 +98,23 @@ model PageSection {
   items            Json     @default("[]")
   updatedAt        DateTime @updatedAt
 
-  @@unique([page, key, locale])
-  @@index([page, locale, order])
+  @@unique([page, customPageId, key, locale])
+  @@index([page, customPageId, locale, order])
+}
+
+/// Pages created from the CMS, served at /{slug} and built from generic sections.
+model CustomPage {
+  id             String   @id @default(cuid())
+  slug           String
+  locale         String   @default("en")
+  title          String
+  seoTitle       String?
+  seoDescription String?
+  published      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([slug, locale])
 }
 
 model Activity {

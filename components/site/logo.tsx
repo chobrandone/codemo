@@ -28,7 +28,7 @@ export function Logo({
   dark?: boolean;
 }) {
   return (
-    <span className="flex items-center gap-3">
+    <span className="notranslate flex items-center gap-3" translate="no">
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover sm:h-11 sm:w-11" />

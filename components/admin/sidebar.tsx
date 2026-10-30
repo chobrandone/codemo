@@ -37,7 +37,7 @@ const groups = [
   {
     label: "Content",
     items: [
-      { href: "/admin/pages", label: "Page sections", icon: FileText },
+      { href: "/admin/pages", label: "Pages & sections", icon: FileText },
       { href: "/admin/activities", label: "Activities", icon: Sprout },
       { href: "/admin/projects", label: "Expansion projects", icon: FolderKanban },
       { href: "/admin/infrastructure", label: "Infrastructure", icon: Building2 },

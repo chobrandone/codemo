@@ -5,6 +5,7 @@ import { getActivities, getSections, sectionMap, type Section } from "@/lib/cont
 import { CtaSection, PageHero } from "@/components/site/sections";
 import { Reveal, SiteImage } from "@/components/site/primitives";
 import { CountUp } from "@/components/site/count-up";
+import { GenericSection } from "@/components/site/generic-sections";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,7 +21,7 @@ export default async function ActivitiesPage() {
   const [sections, activities] = await Promise.all([getSections("ACTIVITIES"), getActivities()]);
 
   const render = (s: Section) => {
-    switch (s.key) {
+    switch (s.type || s.key) {
       case "hero":
         return <PageHero key={s.id} section={s} />;
       case "list":
@@ -96,7 +97,7 @@ export default async function ActivitiesPage() {
       case "cta":
         return <CtaSection key={s.id} section={s} />;
       default:
-        return null;
+        return <GenericSection key={s.id} section={s} />;
     }
   };
 

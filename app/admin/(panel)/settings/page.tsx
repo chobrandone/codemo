@@ -67,6 +67,23 @@ export default async function SettingsPage() {
       </Card>
 
       <Card>
+        <CardHeader
+          title="Languages"
+          description="Language switch in the top bar, powered by Google Translate (automatic machine translation of the public site)."
+        />
+        <CardBody>
+          <Field
+            label="Languages offered"
+            htmlFor="languages"
+            hint="Comma-separated codes; the first is the language the content is written in. Examples: en,fr — en,fr,es. Leave only “en” to hide the switch."
+          >
+            <Input id="languages" name="languages" defaultValue={v("languages") || "en,fr"} className="max-w-xs" />
+            <FieldError name="languages" />
+          </Field>
+        </CardBody>
+      </Card>
+
+      <Card>
         <CardHeader title="Footer" />
         <CardBody className="grid gap-5">
           <Field label="Footer description" htmlFor="footerTagline">
